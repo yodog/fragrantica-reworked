@@ -37,12 +37,12 @@ jobs:
 
       - name: Run web-ext lint
         run: |
-          web-ext lint --source-dir=. --ignore-files="PLAN.md" "fragrantica_*.html"
+          web-ext lint --source-dir=. --ignore-files="PLAN.md" "fragrantica_*.html" "README.md" "AGENTS.md"
 
       - name: Build Extension Package
         run: |
           mkdir -p dist
-          web-ext build --source-dir=. --artifacts-dir=dist --overwrite-dest --ignore-files="PLAN.md" "fragrantica_*.html"
+          web-ext build --source-dir=. --artifacts-dir=dist --overwrite-dest --ignore-files="PLAN.md" "fragrantica_*.html" "README.md" "AGENTS.md"
           # Create .xpi copy for convenient Firefox manual installation
           for f in dist/*.zip; do
             cp "$f" "${f%.zip}.xpi"
