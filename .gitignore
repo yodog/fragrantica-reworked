@@ -1,0 +1,22 @@
+# Analise temporaria do HTML do Fragrantica (usado p/ mapear observers)
+fragrantica_*.html
+PLAN.md
+
+# Build artifacts
+build/
+dist/
+*.zip
+*.xpi
+
+
+# Artefatos locais
+*.log
+.DS_Store
+.vscode
+
+
+# IA
+.amazonq
+AGENTS-*
+AGENTS.*
+memory.md

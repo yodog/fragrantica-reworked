@@ -1,0 +1,77 @@
+name: Build and Package Extension
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    outputs:
+      MANIFEST_ID: ${{ steps.get_version.outputs.MANIFEST_ID }}
+      ZIP_FILENAME: ${{ steps.get_zip_name.outputs.zip_filename }}
+      VERSION: ${{ steps.get_version.outputs.version }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Syntax Check
+        run: node --check *.js
+
+      - name: Install web-ext globally
+        run: npm install -g web-ext
+
+      - name: Run web-ext lint
+        run: |
+          web-ext lint --source-dir=. --ignore-files="PLAN.md" "fragrantica_*.html"
+
+      - name: Build Extension Package
+        run: |
+          mkdir -p dist
+          web-ext build --source-dir=. --artifacts-dir=dist --overwrite-dest --ignore-files="PLAN.md" "fragrantica_*.html"
+          # Create .xpi copy for convenient Firefox manual installation
+          for f in dist/*.zip; do
+            cp "$f" "${f%.zip}.xpi"
+          done
+
+      - name: Get generated zip filename
+        id: get_zip_name
+        run: |
+          ZIP_FILE=$(find dist -name "*.zip" -print -quit)
+          ZIP_FILENAME=$(basename "$ZIP_FILE")
+          echo "zip_filename=$ZIP_FILENAME" >> $GITHUB_OUTPUT
+
+      - name: Read version and ID from manifest.json
+        id: get_version
+        run: |
+          VERSION=$(jq -r '.version' manifest.json)
+          MANIFEST_ID=$(jq -r '.browser_specific_settings.gecko.id' manifest.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "MANIFEST_ID=$MANIFEST_ID" >> $GITHUB_OUTPUT
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.get_zip_name.outputs.zip_filename }}
+          path: dist/*
+          overwrite: true
+
+      - name: Create or update GitHub Release
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: dist/*
+          allowUpdates: true
+          tag: ${{ steps.get_version.outputs.version }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          generateReleaseNotes: true

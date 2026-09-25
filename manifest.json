@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Fragrantica Reworked",
+  "version": "2026.8.25.1337",
+  "description": "Fragrantica new options: bigger perfume pictures, social card, EN reviews on .com.br",
+  "permissions": ["activeTab", "scripting", "tabs"],
+  "host_permissions": ["*://*.fragrantica.com/*", "*://*.fragrantica.com.br/*"],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "fragrantica-reworked@rasg",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.fragrantica.com.br/*"],
+      "js": ["content-br.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
