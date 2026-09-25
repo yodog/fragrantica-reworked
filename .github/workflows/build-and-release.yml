@@ -11,6 +11,10 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    # GITHUB_TOKEN defaults to read-only on repositories created after Feb/2023.
+    # Creating/updating Releases and pushing the version tag requires write access.
+    permissions:
+      contents: write
     outputs:
       MANIFEST_ID: ${{ steps.get_version.outputs.MANIFEST_ID }}
       ZIP_FILENAME: ${{ steps.get_zip_name.outputs.zip_filename }}
